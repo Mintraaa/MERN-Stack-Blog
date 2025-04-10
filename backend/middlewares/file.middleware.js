@@ -1,8 +1,8 @@
 const multer = require("multer");
 const path = require("path");
-//Set Storage engine
+
 const storage = multer.diskStorage({
-  destination: "./uploads/",
+  destination: "./uploads/", // ระบุโฟลเดอร์ที่ใช้จัดเก็บไฟล์
   filename: (req, file, cb) => {
     cb(
       null,
@@ -11,24 +11,24 @@ const storage = multer.diskStorage({
   },
 });
 
-// Init Upload
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 1000000 }, //limit 1Mb
-  fileFilter: (req, file, cb) => {
-    checkFileType(file, cb); // Check file ext
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter(req, file, cb) {
+    checkFileType(file, cb); // ตรวจสอบประเภทไฟล์
   },
-}).single("file"); // input name
+}).single("file"); // ระบุชื่อ input ที่ใช้ใน form
 
 function checkFileType(file, cb) {
-  const fileTypes = /jpeg|jpg|png|gif|webp/;
-  const extName = fileTypes.test(path.extname(file.originalname).toLowerCase());
-  const mimetype = fileTypes.test(file.mimetype);
+  // ประเภทไฟล์ที่อนุญาต
+  const fileType = /jpeg|jpg|png|gif|webp/;
+  const extName = fileType.test(path.extname(file.originalname).toLowerCase());
+  const mimeType = fileType.test(file.mimetype);
 
-  if (mimetype && extName) {
-    return cb(null, true);
+  if (mimeType && extName) {
+    cb(null, true); // ไฟล์ผ่านการตรวจสอบ
   } else {
-    cb("Error: Image Only!");
+    cb(new Error("Error: Images Only!")); // ไฟล์ไม่ผ่านการตรวจสอบ
   }
 }
 

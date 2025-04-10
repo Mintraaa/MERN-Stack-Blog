@@ -1,17 +1,20 @@
 const jwt = require("jsonwebtoken");
-require("dotenv").config();
-const secret = process.env.SECRET;
 
-verifyToken = (req, res, next) => {
-  const token = req.headers["x-access-token"];
+const verifyToken = (req, res, next) => {
+  const token = req.header("x-access-token"); // รับ token จาก header
   if (!token) {
-    return res.status(401).json({ message: "Token is missing" });
+    return res.status(401).json({ message: "Token is missing" }); // ไม่มี token
   }
-  jwt.verify(token, secret, (err, decoded) => {
-    if (err) return res.status(403).json({ message: "Access Forbidden!!" });
-    req.userId = decoded.id;
-    req.username = decoded.username;
-    next();
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Access Forbidden" }); // Token ไม่ถูกต้อง
+    }
+
+    // หาก token ถูกต้อง
+    req.userId = decoded.id; // เก็บ userId ไว้ใน req
+    req.username = decoded.username; // เก็บ username ไว้ใน req
+    next(); // ไปยัง middleware หรือ route ถัดไป
   });
 };
 
